@@ -577,29 +577,36 @@ export default function Editor({ socket, roomId, username, learningMode, onlineU
     setHasRuntimeError(false);
 
     try {
-      let serverLang = language;
-      if (language === "c") serverLang = "c";
-      if (language === "cpp") serverLang = "cpp";
+      let pistonLang = language;
 
-      const resp = await fetch("http://localhost:5001/api/run", {
+      if (language === "javascript") pistonLang = "javascript";
+      if (language === "c") pistonLang = "c";
+      if (language === "cpp") pistonLang = "cpp";
+      if (language === "python") pistonLang = "python";
+      if (language === "java") pistonLang = "java";
+
+      const res = await fetch("https://emkc.org/api/v2/piston/execute", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ language: serverLang, code, stdin }),
+        body: JSON.stringify({
+          language: pistonLang,
+          version: "*",
+          files: [{ content: code }],
+          stdin: stdin || "",
+        }),
       });
 
-      const data = await resp.json();
+      const data = await res.json();
 
-      if (!data?.ok) {
-        setHasRuntimeError(true);
-        setOutput([`ERROR: ${data?.error || "Unknown error"}`]);
-        return;
-      }
+      const output =
+        data?.run?.output ??
+        data?.compile?.output ??
+        data?.run?.stderr ??
+        "No output";
 
-      const out = (data.stdout || "").trim();
-      const err = (data.stderr || "").trim();
-      if (err) setHasRuntimeError(true);
+      if (data?.run?.stderr) setHasRuntimeError(true);
 
-      setOutput([out ? out : "(no stdout)", err ? "----- STDERR -----\n" + err : ""].filter(Boolean));
+      setOutput([output]);
     } catch (e) {
       setHasRuntimeError(true);
       setOutput(["ERROR: " + String(e)]);
