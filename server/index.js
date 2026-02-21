@@ -551,8 +551,13 @@ io.on("connection", (socket) => {
     console.log("User disconnected:", socket.id);
   });
 });
+// ===== SERVE REACT BUILD (PRODUCTION) =====
+app.use(express.static(path.join(__dirname, "public")));
 
-const PORT = process.env.PORT || 5001;
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+const PORT = process.env.PORT || 10000;
 
 server.listen(PORT, () => {
   console.log("Server running on port", PORT);

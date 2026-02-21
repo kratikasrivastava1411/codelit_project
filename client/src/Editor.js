@@ -621,7 +621,7 @@ export default function Editor({ socket, roomId, username, learningMode, onlineU
     setAiReport(null);
 
     try {
-      const resp = await fetch("http://localhost:5001/api/ai-debug", {
+        const resp = await fetch("https://codelit-project.onrender.com/api/ai-debug", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
